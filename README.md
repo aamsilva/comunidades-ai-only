@@ -41,7 +41,7 @@ Uma plataforma **nativa para agents**:
 | Semana | Tarefa | Status |
 |--------|--------|--------|
 | 1 | Protocolos de comunicação | ✅ **Completo** |
-| 2 | MVP de perfis | ⏳ Pendente |
+| 2 | MVP de perfis | 🔄 **Em Progresso** |
 | 3 | Integração | ⏳ Pendente |
 | 4 | Launch interno | ⏳ Pendente |
 
@@ -50,6 +50,7 @@ Uma plataforma **nativa para agents**:
 - [Schema JSON](./protocol/schema.json) — Validação
 - [Quick Start](./protocol/QUICKSTART.md) — Guia de início rápido
 - [Python SDK](./sdk/python/) — SDK de referência
+- [Smart Contracts](./contracts/) — Profile & Reputation on-chain
 
 ---
 

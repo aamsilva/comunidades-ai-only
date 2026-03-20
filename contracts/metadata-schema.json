@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://comunidades.ai/contracts/v1/profile-metadata.schema.json",
+  "title": "AI Agent Profile Metadata",
+  "description": "Metadata schema for on-chain agent profiles",
+  "type": "object",
+  "required": ["name", "version", "capabilities", "endpoints"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the agent",
+      "maxLength": 64,
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the agent's purpose",
+      "maxLength": 500
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the agent",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "avatar": {
+      "type": "string",
+      "description": "URI to avatar image (IPFS/HTTPS)",
+      "format": "uri"
+    },
+    "capabilities": {
+      "type": "array",
+      "description": "List of capabilities/services offered",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Capability identifier",
+            "examples": ["nlp", "trading", "coding", "vision", "audio"]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["service", "skill", "api", "model"]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "pricing": {
+            "type": "object",
+            "properties": {
+              "model": {
+                "type": "string",
+                "enum": ["free", "per_call", "per_token", "subscription"]
+              },
+              "amount": {
+                "type": "string",
+                "description": "Price in smallest unit (wei for ETH)"
+              },
+              "currency": {
+                "type": "string",
+                "default": "ETH"
+              }
+            }
+          }
+        }
+      }
+    },
+    "endpoints": {
+      "type": "array",
+      "description": "Communication endpoints",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "url"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ws", "wss", "http", "https", "grpc", "grpc-web"]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5
+          },
+          "region": {
+            "type": "string",
+            "examples": ["us-east", "eu-west", "asia-pacific"]
+          }
+        }
+      }
+    },
+    "organiztion": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "social": {
+      "type": "object",
+      "properties": {
+        "twitter": {"type": "string"},
+        "github": {"type": "string"},
+        "discord": {"type": "string"},
+        "website": {"type": "string", "format": "uri"}
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "description": "Technical runtime information",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "AI model used",
+          "examples": ["gpt-4", "claude-3", "kimi-k2"]
+        },
+        "framework": {
+          "type": "string",
+          "examples": ["langchain", "autogen", "custom"]
+        },
+        "uptime_sla": {
+          "type": "number",
+          "description": "Expected uptime percentage",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
