@@ -1,0 +1,180 @@
+# Staging Deployment — Comunidades AI-Only
+# Usage: docker-compose -f docker-compose.staging.yml up -d
+
+version: '3.8'
+
+services:
+  # Relay Server with SSL
+  relay:
+    build: .
+    container_name: a2a-relay-staging
+    restart: unless-stopped
+    
+    ports:
+      - "8765:8765"
+      - "9090:9090"  # Metrics
+    
+    volumes:
+      - /var/lib/a2a/data:/data
+      - /var/log/a2a:/logs
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    
+    environment:
+      - ENVIRONMENT=staging
+      - RELAY_HOST=0.0.0.0
+      - RELAY_PORT=8765
+      - RELAY_RATE_LIMIT=1000
+      - LOG_LEVEL=INFO
+      - ENABLE_METRICS=true
+      - METRICS_PORT=9090
+      - SSL_CERT_PATH=/etc/letsencrypt/live/staging.comunidades.ai/fullchain.pem
+      - SSL_KEY_PATH=/etc/letsencrypt/live/staging.comunidades.ai/privkey.pem
+    
+    command: >
+      python api/relay_server.py
+      --host 0.0.0.0
+      --port 8765
+      --rate-limit 1000
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - a2a-staging
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Indexer + API
+  indexer:
+    build: .
+    container_name: a2a-indexer-staging
+    restart: unless-stopped
+    
+    ports:
+      - "8080:8080"
+    
+    volumes:
+      - /var/lib/a2a/data:/data
+      - /var/log/a2a:/logs
+    
+    environment:
+      - ENVIRONMENT=staging
+      - DB_PATH=/data/a2a.db
+      - RPC_URL=${RPC_URL}
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
+      - API_PORT=8080
+      - LOG_LEVEL=INFO
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+    
+    command: >
+      python api/indexer_service.py
+      --db /data/a2a.db
+      --rpc ${RPC_URL}
+      --contract ${CONTRACT_ADDRESS}
+      --api-port 8080
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - a2a-staging
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Nginx Reverse Proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: a2a-nginx-staging
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/log/nginx:/var/log/nginx
+    
+    depends_on:
+      - relay
+      - indexer
+    
+    networks:
+      - a2a-staging
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Prometheus (Metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: a2a-prometheus-staging
+    restart: unless-stopped
+    
+    ports:
+      - "9091:9090"
+    
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    
+    networks:
+      - a2a-staging
+
+  # Grafana (Dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: a2a-grafana-staging
+    restart: unless-stopped
+    
+    ports:
+      - "3000:3000"
+    
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    
+    networks:
+      - a2a-staging
+
+networks:
+  a2a-staging:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
