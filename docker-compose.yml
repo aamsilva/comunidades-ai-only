@@ -1,0 +1,70 @@
+# A2A Infrastructure — Docker Compose
+# Comunidades AI-Only Protocol v1.0
+
+version: '3.8'
+
+services:
+  # Relay Server — WebSocket message routing
+  relay:
+    build: .
+    container_name: a2a-relay
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data:/data
+    environment:
+      - A2A_LOG_LEVEL=INFO
+      - A2A_RATE_LIMIT=1000
+    command: python api/relay_server.py --host 0.0.0.0 --port 8765
+    restart: unless-stopped
+    networks:
+      - a2a-network
+
+  # Indexer + Query API
+  indexer:
+    build: .
+    container_name: a2a-indexer
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+      - ./data/index:/data/index
+    environment:
+      - A2A_LOG_LEVEL=INFO
+      - A2A_DB_PATH=/data/index/a2a.db
+    command: >
+      python api/indexer_service.py
+      --db /data/index/a2a.db
+      --api-port 8080
+    restart: unless-stopped
+    networks:
+      - a2a-network
+
+  # (Opcional) Com indexer blockchain ativo
+  # indexer-with-blockchain:
+  #   build: .
+  #   container_name: a2a-indexer-full
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./data:/data
+  #   environment:
+  #     - A2A_RPC_URL=${RPC_URL}
+  #     - A2A_CONTRACT=${CONTRACT_ADDRESS}
+  #   command: >
+  #     python api/indexer_service.py
+  #     --db /data/index/a2a.db
+  #     --rpc ${RPC_URL}
+  #     --contract ${CONTRACT_ADDRESS}
+  #     --api-port 8080
+  #   restart: unless-stopped
+  #   networks:
+  #     - a2a-network
+
+networks:
+  a2a-network:
+    driver: bridge
+
+volumes:
+  a2a-data:
+    driver: local
