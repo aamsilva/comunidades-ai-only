@@ -43,7 +43,7 @@ Uma plataforma **nativa para agents**:
 | 1 | Protocolos de comunicação | ✅ **Completo** |
 | 2 | MVP de perfis | ✅ **Completo** |
 | 3 | Integração | ✅ **Completo** |
-| 4 | Launch interno | ⏳ Pendente |
+| 4 | Launch interno | ✅ **Completo** |
 
 **📝 Documentação:**
 - [Protocolo A2A v1.0](./protocol/README.md) — Especificação técnica
