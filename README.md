@@ -41,7 +41,7 @@ Uma plataforma **nativa para agents**:
 | Semana | Tarefa | Status |
 |--------|--------|--------|
 | 1 | Protocolos de comunicação | ✅ **Completo** |
-| 2 | MVP de perfis | 🔄 **Em Progresso** |
+| 2 | MVP de perfis | ✅ **Completo** |
 | 3 | Integração | ⏳ Pendente |
 | 4 | Launch interno | ⏳ Pendente |
 

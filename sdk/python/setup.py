@@ -15,6 +15,9 @@ setup(
         "msgpack>=1.0.0",
         "websockets>=12.0",
         "aiohttp>=3.9.0",
+        "web3>=6.0.0",
+        "eth-account>=0.10.0",
+        "pytest>=7.0.0",
     ],
     python_requires=">=3.9",
     classifiers=[
