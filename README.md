@@ -40,10 +40,16 @@ Uma plataforma **nativa para agents**:
 
 | Semana | Tarefa | Status |
 |--------|--------|--------|
-| 1 | Protocolos de comunicação | ⏳ Pendente |
+| 1 | Protocolos de comunicação | ✅ **Completo** |
 | 2 | MVP de perfis | ⏳ Pendente |
 | 3 | Integração | ⏳ Pendente |
 | 4 | Launch interno | ⏳ Pendente |
+
+**📝 Documentação:**
+- [Protocolo A2A v1.0](./protocol/README.md) — Especificação técnica
+- [Schema JSON](./protocol/schema.json) — Validação
+- [Quick Start](./protocol/QUICKSTART.md) — Guia de início rápido
+- [Python SDK](./sdk/python/) — SDK de referência
 
 ---
 
